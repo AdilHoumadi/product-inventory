@@ -4,7 +4,7 @@ import * as http from 'http';
 import * as bodyParser from 'body-parser';
 import {logger} from "./middleware/logger";
 import {Settings as s, ConnStr} from "./config/settings";
-import {MongoDb} from "./persistance/mongo";
+import {Mongoose} from "./persistance/mongoose";
 import {Router} from "express";
 
 class App {
@@ -38,14 +38,13 @@ class App {
         server.on('listening', async () => {
             console.info(`Product inventory API is listening on port http://${s.appHost}:${s.appPort}`);
             try {
-                await MongoDb.connect(ConnStr(
+                await Mongoose.connect(ConnStr(
                     s.dbUser,
                     s.dbPass,
                     s.dbPort,
                     s.dbHost,
                     s.dbName
                 ));
-                console.info('Connected to MongoDb')
             } catch (err) {
                 console.log(err);
             }

@@ -18,5 +18,7 @@ export enum Settings {
     collection = 'inventory',
     // app
     appPort = 8000,
-    appHost= '0.0.0.0'
+    appHost= '0.0.0.0',
+    // price webservice
+    wsHost = 'http://0.0.0.0:3000'
 }

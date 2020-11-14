@@ -1,6 +1,7 @@
 interface Inventory {
     id: string;
     name: string;
+    description: string;
     quantity: number;
 }
 
@@ -9,4 +10,5 @@ interface Product {
     currency: string
 }
 
-export type ProductInventory = Inventory | Product;
+type ProductInventory = Inventory & Product;
+export default ProductInventory;

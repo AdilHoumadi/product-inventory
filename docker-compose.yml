@@ -12,7 +12,7 @@ services:
     ports:
       - '27017:27017'
     volumes:
-      - ./src/config/init.js:/docker-entrypoint-initdb.d/init.js
+      - ./init/init.js:/docker-entrypoint-initdb.d/init.js
       - mongo_db:/data/db
   price:
     image: adichallenge/adichallenge:product-engine
