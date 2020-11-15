@@ -7,6 +7,32 @@ import {errorHandler, notFoundHandler} from "./middleware/error";
 import {Settings as s, ConnStr} from "./config/Settings";
 import {Mongoose} from "./persistance/mongoose";
 import {Router} from "express";
+import * as swaggerUi from 'swagger-ui-express';
+import * as swaggerJSDoc from "swagger-jsdoc";
+
+const swaggerDefinition = {
+    openapi: "3.0.0",
+    info: {
+        title: "Product Inventory",
+        description: "Product Inventory API",
+        version: "1.0.0",
+    },
+    servers: [
+        {
+            url: "http://localhost:3000"
+        }
+    ],
+    host: "http://localhost:3000",
+    basePath: "/",
+};
+const options = {
+    swaggerDefinition,
+    explorer: true,
+    apis: [
+        "**/*.yaml",
+    ]
+};
+const SwaggerSpec = swaggerJSDoc(options);
 
 class App {
 
@@ -25,6 +51,7 @@ class App {
         this.app.use(cors());
         this.app.use(bodyParser.json());
         this.app.use(logger);
+        this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(SwaggerSpec));
     }
 
     private errorsMiddleware() {

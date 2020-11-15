@@ -1,0 +1,76 @@
+paths:
+  /inventory/consume:
+    post:
+      summary: Consume products
+      tags: [ product ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                confirm:
+                  type: boolean
+                  description: confirm the consumption
+                products:
+                  type: array
+                  description: product name
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: product id
+                      request:
+                        type: number
+                        description: requested quantity
+      responses:
+        "200":
+          description: Product inventory details
+          content:
+            application/json:
+              schema:
+                type: array
+                description: list of products
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: the product id
+                    name:
+                      type: string
+                      description: product name
+                    description:
+                      type: string
+                      description: product description
+                    quantity:
+                      type: number
+                      description: The actual price for the product
+                    price:
+                      type: number
+                      description: The currency symbol for the price
+                    currency:
+                      type: string
+                      description: The price product
+        "400":
+          description: Wrong request. Accept-Language must be provided or country is not supported
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: error descrbing the response
+        "404":
+          description: Cannot find the product
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: error descrbing the response
