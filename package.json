@@ -2,10 +2,13 @@
   "name": "product-inventory",
   "version": "1.0.0",
   "description": "Product Inventory Microservice",
+  "repository": {
+    "url": "https://github.com/AdilHoumadi/product-inventory.git"
+  },
   "main": "index.js",
   "scripts": {
-    "start": "nodemon -x ts-node src/main.ts",
-    "data": "ts-node src/data/fake.ts",
+    "start": "nodemon -x ts-node ./src/main.ts",
+    "data": "ts-node ./src/data/fake.ts",
     "build": "tsc -p .",
     "test": "mocha test"
   },
@@ -18,7 +21,10 @@
     "mongodb": "^3.6.3",
     "mongoose": "^5.10.14",
     "node-fetch": "^2.6.1",
-    "typescript": "^4.0.5"
+    "typescript": "^4.0.5",
+    "ts-node": "^9.0.0",
+    "mocha": "^8.2.1",
+    "chai": "^4.2.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.8",
@@ -28,11 +34,8 @@
     "@types/mongoose": "^5.10.0",
     "@types/node": "^14.14.7",
     "@types/node-fetch": "^2.5.7",
-    "chai": "^4.2.0",
     "faker": "^5.1.0",
-    "mocha": "^8.2.1",
     "nodemon": "^2.0.6",
-    "supertest": "^6.0.1",
-    "ts-node": "^9.0.0"
+    "supertest": "^6.0.1"
   }
 }

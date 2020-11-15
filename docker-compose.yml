@@ -1,6 +1,13 @@
 volumes:
   mongo_db:
 services:
+  inventory:
+    hostname: inventory
+    container_name: inventory
+    restart: always
+    build: .
+    ports:
+      - '8000:8000'
   mongodb:
     image: mongo:4.4.1
     container_name: mongodb

@@ -13,12 +13,12 @@ export enum Settings {
     dbUser = 'root',
     dbPass = 'pass',
     dbName = 'product',
-    dbHost= '0.0.0.0',
+    dbHost= 'mongodb',
     dbPort = 27017,
     collection = 'inventory',
     // app
     appPort = 8000,
     appHost= '0.0.0.0',
     // price webservice
-    wsHost = 'http://0.0.0.0:3000'
+    wsHost = 'http://price:3000'
 }
