@@ -1,5 +1,6 @@
 import {Request, Response, NextFunction, Router} from 'express';
 import ProductInventory from "../../persistance/model/InventoryInterface";
+import RequestedQty from "../../persistance/model/RequestInventoryInterface";
 import InventoryService from "../../service/InventoryService";
 
 class InventoryController {
@@ -31,24 +32,39 @@ class InventoryController {
 
     private getInventory = async (req: Request, res: Response, _: NextFunction) => {
         const id = req.params.id;
-        if(id) {
+        if (id) {
             const language = req.headers["accept-language"]?.toLowerCase();
             this.inventoryService.getProductInventory(id, language).then((data) => {
-                if('error' in  data) {
+                if (data && 'error' in data) {
                     res.status(404).send(data);
                 } else {
                     res.status(200).send(data);
                 }
             });
         } else {
-            res.status(200).send({
+            res.status(404).send({
                 error: 'Please provide a valid ID'
             });
         }
     }
 
     private consumeInventory = (req: Request, res: Response, _: NextFunction) => {
-        res.status(200).send(this.inventories);
+        const products = req.body.products as RequestedQty[];
+        const confirm = req.body.confirm as boolean;
+        if (products) {
+            const language = req.headers["accept-language"]?.toLowerCase();
+            this.inventoryService.consumeProduct(products, confirm, language).then((data) => {
+                if (data && 'error' in data) {
+                    res.status(404).send(data);
+                } else {
+                    res.status(200).send(data);
+                }
+            });
+        } else {
+            res.status(404).send({
+                error: 'Please a list of request with an array of products'
+            });
+        }
     }
 
     private confirmConsumption = (req: Request, res: Response, _: NextFunction) => {

@@ -1,4 +1,4 @@
-interface ErrorProduct {
-    error: string;
+interface ErrorProduct<T> {
+    error: T;
 }
 export default ErrorProduct;
