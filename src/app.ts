@@ -3,7 +3,8 @@ import * as cors from 'cors';
 import * as http from 'http';
 import * as bodyParser from 'body-parser';
 import {logger} from "./middleware/logger";
-import {Settings as s, ConnStr} from "./config/settings";
+import {errorHandler, notFoundHandler} from "./middleware/error";
+import {Settings as s, ConnStr} from "./config/Settings";
 import {Mongoose} from "./persistance/mongoose";
 import {Router} from "express";
 
@@ -11,11 +12,12 @@ class App {
 
     public app: express.Application;
 
-    constructor(controllers) {
+    constructor(controllers: Router[]) {
         this.app = express();
 
         this.initMiddlewares();
         this.initControllers(controllers);
+        this.errorsMiddleware();
     }
 
     private initMiddlewares() {
@@ -25,7 +27,12 @@ class App {
         this.app.use(logger);
     }
 
-    private initControllers(controllers: Array<Router>[]) {
+    private errorsMiddleware() {
+        this.app.use(errorHandler);
+        this.app.use(notFoundHandler);
+    }
+
+    private initControllers(controllers: Router[]) {
         controllers.forEach((r) => {
             this.app.use('/', r);
         });

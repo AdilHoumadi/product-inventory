@@ -1,9 +1,8 @@
 import PriceWebservice from "../webservice/PriceWebservice";
 import InventoryModel from "../persistance/model/InventoryModel";
 import ProductInventory from "../persistance/model/InventoryInterface";
-import Product from "../persistance/model/InventoryInterface";
 import RequestedQty from "../persistance/model/RequestInventoryInterface";
-import ErrorProduct from "../config/ErrorInterface";
+import ProductErrors from "../config/ErrorInterface";
 import * as mongoose from 'mongoose';
 
 class InventoryService {
@@ -14,17 +13,21 @@ class InventoryService {
         this.priceWebservice = priceWebservice;
     }
 
-    public async getProductInventory(id: string, language: string): Promise<ProductInventory | ErrorProduct<string>> {
+    public async getProductInventory(id: string, language: string): Promise<ProductInventory | ProductErrors<string>> {
         return Promise.all([
             await this.priceWebservice.getProductPrice(id, language),
             await InventoryModel.findById(id),
         ]).then(([price, inventory]) => {
             if (price && inventory) {
-                const productInventory: ProductInventory = {
-                    ...inventory.toObject(),
-                    ...price
+                if('error' in price) {
+                    return {error: 'Cannot fetch product price'}
+                } else {
+                    const productInventory: ProductInventory = {
+                        ...inventory.toObject(),
+                        ...price
+                    }
+                    return productInventory;
                 }
-                return productInventory;
             } else {
                 return {error: 'Cannot find the product'};
             }
@@ -41,19 +44,19 @@ class InventoryService {
             (err, listProducts) => {
                 let products: ProductInventory[] = [];
                 listProducts.forEach((p) => {
-                    products.push(p.toObject())
+                    products.push({...p.toObject(), id: p._id})
                 })
                 return products;
             }
         );
     }
 
-    private handleProductOutOfStock(request, products): ErrorProduct<string[]> {
+    private handleProductOutOfStock(request: RequestedQty[], products: ProductInventory[]): ProductErrors<any[]> {
         console.info('Handle product out of stock')
-        const productsOutOfStock = [];
+        const productsOutOfStock: { [x: string]: string; }[] = [];
         request.forEach((r) => {
             products.forEach((p) => {
-                if (p._id === r.id && p.quantity < r.request) {
+                if (p.id === r.id && p.quantity < r.request) {
                     productsOutOfStock.push({
                         [r.id]: `Product with id: ${r.id} is out of stock. The available quantity is: ${p.quantity} and the requested is: ${r.request}`
                     })
@@ -65,22 +68,26 @@ class InventoryService {
         };
     }
 
-    private async handleTransaction(r) {
+    private async handleTransaction(r: RequestedQty) {
         console.info('Handle transaction');
         const session = await mongoose.startSession();
         session.startTransaction();
-        let product: Product = null;
-        await InventoryModel.findById(r.id).then((row) => {
-            product = row.toObject();
-            if(product.quantity - r.request <= 0) {
-                product.quantity = 0;
-            } else {
-                product.quantity = product.quantity - r.request;
+        const product = await InventoryModel.findById(r.id).then((row) => {
+            if(row) {
+                const product = row.toObject();
+                if(product.quantity - r.request <= 0) {
+                    product.quantity = 0;
+                } else {
+                    product.quantity = product.quantity - r.request;
+                }
+                return product;
             }
-            InventoryModel.updateOne({_id: r.id}, product).then(() => {
+        }).then(async (product) => {
+            return await InventoryModel.updateOne({_id: r.id}, product).then(() => {
                 console.info(`Updated done: ${r.id}`);
+                return product;
             });
-        });
+        })
         await session.commitTransaction();
         return product;
     }
@@ -88,10 +95,10 @@ class InventoryService {
     private async handleProductConsumption(
         confirm: boolean,
         request: RequestedQty[],
-        errors: ErrorProduct<string[]>,
-        language: string): Promise<ProductInventory[]|ErrorProduct<string[]> > {
+        errors: ProductErrors<string[]>,
+        language: string): Promise<ProductInventory[]|ProductErrors<string[]> > {
         console.info('Handle product consumption')
-        if(confirm === true || (errors.error && errors.error.length === 0)) {
+        if(confirm || (errors.error && errors.error.length === 0)) {
             const results : ProductInventory[] = [];
             for (const r of request) {
                 Promise.all([
@@ -115,7 +122,7 @@ class InventoryService {
             return errors;
         }
     }
-    public async consumeProduct(request: RequestedQty[], confirm: boolean, language: string): Promise<ErrorProduct<string[]>|ProductInventory[]> {
+    public async consumeProduct(request: RequestedQty[], confirm: boolean, language: string): Promise<ProductErrors<string[]>|ProductInventory[]> {
         const ids = request.map(val => val.id);
         return await this
             .getRequestedProducts(ids)

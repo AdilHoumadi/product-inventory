@@ -10,16 +10,21 @@ class PriceWebservice {
         this.webserviceUrl = webserviceUrl;
     }
 
-    async getProductPrice(id: string, acceptLanguage?: string): Promise<Product> {
+    async getProductPrice(id: string, acceptLanguage: string): Promise<Product|Error> {
         if(acceptLanguage) {
             acceptLanguage = PriceWebservice.defaultLanguage;
         }
         return await fetch(`${this.webserviceUrl}/product/${id}`, {
-            method: 'get',
-            headers: {'Content-Type': 'application/json', 'Accept-Language': acceptLanguage}
+            'method': 'get',
+            'headers': {
+                'Content-Type': 'application/json',
+                'Accept-Language': acceptLanguage
+            }
         }).then((product => {
             return product.json();
-        }));
+        })).catch((err) => {
+            return {error: err.toString()}
+        });
     }
 }
 

@@ -1,23 +1,12 @@
 import {Request, Response, NextFunction, Router} from 'express';
-import ProductInventory from "../../persistance/model/InventoryInterface";
 import RequestedQty from "../../persistance/model/RequestInventoryInterface";
 import InventoryService from "../../service/InventoryService";
+import Validator from "../../validator/validator";
 
 class InventoryController {
     public router = Router();
     public path: string = '/inventory';
     private inventoryService: InventoryService;
-
-    private inventories: ProductInventory[] = [
-        {
-            id: '123-456',
-            name: 'stan smith ',
-            description: 'Best product ever!',
-            quantity: 350,
-            currency: '€',
-            price: 39.81,
-        }
-    ];
 
     constructor(inventoryService: InventoryService) {
         this.initRoutes();
@@ -27,13 +16,16 @@ class InventoryController {
     public initRoutes() {
         this.router.get(`${this.path}/product/:id`, this.getInventory);
         this.router.post(`${this.path}/consume`, this.consumeInventory);
-        this.router.post(`${this.path}/confirm`, this.confirmConsumption);
+    }
+
+    static getAcceptLanguage(req: Request) {
+        return req.headers["accept-language"] ? req.headers["accept-language"].toLowerCase() : '';
     }
 
     private getInventory = async (req: Request, res: Response, _: NextFunction) => {
         const id = req.params.id;
         if (id) {
-            const language = req.headers["accept-language"]?.toLowerCase();
+            const language = InventoryController.getAcceptLanguage(req);
             this.inventoryService.getProductInventory(id, language).then((data) => {
                 if (data && 'error' in data) {
                     res.status(404).send(data);
@@ -51,8 +43,10 @@ class InventoryController {
     private consumeInventory = (req: Request, res: Response, _: NextFunction) => {
         const products = req.body.products as RequestedQty[];
         const confirm = req.body.confirm as boolean;
-        if (products) {
-            const language = req.headers["accept-language"]?.toLowerCase();
+        const errors = Validator.validateProductList(products);
+
+        if (errors.length === 0 && products && products.length) {
+            const language = InventoryController.getAcceptLanguage(req);
             this.inventoryService.consumeProduct(products, confirm, language).then((data) => {
                 if (data && 'error' in data) {
                     res.status(404).send(data);
@@ -62,13 +56,10 @@ class InventoryController {
             });
         } else {
             res.status(404).send({
-                error: 'Please a list of request with an array of products'
+                error: 'Please a list of request with an array of products',
+                details: errors
             });
         }
-    }
-
-    private confirmConsumption = (req: Request, res: Response, _: NextFunction) => {
-        res.status(200).send(this.inventories);
     }
 }
 

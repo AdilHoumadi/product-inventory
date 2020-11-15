@@ -2,7 +2,7 @@ import App from './app';
 import InventoryController from "./controller/Inventory/InventoryController";
 import HomeController from "./controller/Home/HomeController";
 import PriceWebservice from "./webservice/PriceWebservice";
-import {Settings} from "./config/settings";
+import {Settings} from "./config/Settings";
 import InventoryService from "./service/InventoryService";
 
 const priceWebservice = new PriceWebservice(Settings.wsHost);

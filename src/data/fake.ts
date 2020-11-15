@@ -1,7 +1,7 @@
 import * as faker from 'faker';
 import ProductModel from "../../src/persistance/model/InventoryModel";
 import {Mongoose} from "../persistance/mongoose";
-import {ConnStr, Settings as s} from "../config/settings";
+import {ConnStr, Settings as s} from "../config/Settings";
 
 const totalProduct = 50;
 faker.seed(1);

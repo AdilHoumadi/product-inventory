@@ -1,4 +1,4 @@
-interface ErrorProduct<T> {
+interface ProductErrors<T> {
     error: T;
 }
-export default ErrorProduct;
+export default ProductErrors;
