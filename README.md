@@ -25,6 +25,11 @@ inventory: http://0.0.0.0:8000
 price webservice: http://0.0.0.0:3000
 ```
 
+### Swagger documentation
+```
+Documentation: http://0.0.0.0:8000/api-docs
+```
+
 ### Requirements
 - docker 
 - docker-compose
